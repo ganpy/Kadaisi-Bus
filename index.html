@@ -266,7 +266,7 @@
   .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;
     margin-top:max(140px,13vh);padding:0 24px;text-align:center}
   .hero .tamil{font-family:'Baloo Thambi 2',sans-serif;font-weight:800;
-    font-size:clamp(52px,11vw,110px);line-height:1.05;
+    font-size:clamp(52px,11vw,110px);line-height:1.3;padding:.05em .1em;margin:-.05em 0;
     background:linear-gradient(180deg,#fff6df 20%,#ffc966 70%,#e89b1c);
     -webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 4px 24px rgba(255,176,0,.35)) drop-shadow(0 2px 6px rgba(0,0,0,.6));}
@@ -450,6 +450,7 @@ const ROUTES = [
     board: '21 · KANAVU EXPRESS',
     sub: 'கனவு எக்ஸ்பிரஸ் — Dream Express',
     playlist: 'PL89t04T3yNyYVi6CQBK-mZ03Ubw6VCOXs', // user's "Night Songs" playlist (14 entries, 2 unavailable publicly → 12 playable)
+    length: 12, // playable count — used to pick a random boarding point
   },
   {
     key: 'kaadhal',
@@ -588,9 +589,14 @@ function boardRoute(r, btn){
   const cas = $('cassette');
   const load = () => {
     lastVideoId = null;
-    player.loadPlaylist({ listType: 'playlist', list: r.playlist, index: 0 });
-    // shuffle once the playlist has been ingested
-    setTimeout(() => { try { player.setLoop(true); player.setShuffle(true); player.nextVideo(); player.playVideo(); } catch(e){} }, 1200);
+    // Start playback inside the click's autoplay grace window — no delayed song-jump,
+    // or fresh visitors get a silently paused player. Mixes (RD…) open with their seed
+    // song; curated playlists board at a random point instead.
+    const isMix = r.playlist.startsWith('RD');
+    const idx = (!isMix && r.length) ? Math.floor(Math.random() * r.length) : 0;
+    player.loadPlaylist({ listType: 'playlist', list: r.playlist, index: idx });
+    // once ingested: always loop; shuffle only curated playlists (mixes keep radio order)
+    setTimeout(() => { try { player.setLoop(true); if (!isMix) player.setShuffle(true); } catch(e){} }, 1200);
     // mixes can ingest slowly and land paused — keep nudging until playback actually starts
     clearInterval(kickTimer);
     let kicks = 0;
