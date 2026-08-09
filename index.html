@@ -318,8 +318,10 @@
   .hero .latin{margin-top:2px;font-size:clamp(13px,2vw,17px);letter-spacing:.42em;text-indent:.42em;
     font-weight:600;color:rgba(255,255,255,.85);text-transform:uppercase}
   .hero .tag{margin-top:10px;font-size:clamp(12px,1.6vw,14px);color:rgba(255,255,255,.55);font-style:italic}
-  .hero .odo{margin-top:8px;font-size:12.5px;color:rgba(255,214,140,.55);font-variant-numeric:tabular-nums}
-  .hero .odo:empty{display:none}
+  .hero .odo{margin-top:9px;display:none}
+  .hero .odo.on{display:block}
+  .hero .odo-ta{font-size:12.5px;color:rgba(255,214,140,.6);font-variant-numeric:tabular-nums}
+  .hero .odo-en{margin-top:1px;font-size:11px;font-style:italic;color:rgba(255,255,255,.38);font-variant-numeric:tabular-nums}
 
   /* ---------- CONDUCTOR'S CALL ---------- */
   .pick{position:relative;z-index:10;margin-top:4.5vh;text-align:center;padding:0 20px;
@@ -477,7 +479,10 @@
     <div class="latin">Kadaisi Bus</div>
   </h1>
   <p class="tag">Tamil songs for the last bus home.</p>
-  <p class="odo" id="odometer"></p>
+  <div class="odo" id="odometer">
+    <div class="odo-ta" id="odoTa"></div>
+    <div class="odo-en" id="odoEn"></div>
+  </div>
 </main>
 
 <div class="pick" id="pickPrompt" aria-hidden="true">
@@ -891,8 +896,12 @@ if (RIDERS_ENDPOINT){
   const show = d => {
     if (d && d.riders)
       $('riders').textContent = `· ${d.riders} ${d.riders === 1 ? 'பயணி' : 'பயணிகள்'}`;
-    if (d && d.rides)
-      $('odometer').textContent = `இது வரை ${d.rides.toLocaleString('en-IN')} பயணங்கள்`;
+    if (d && d.rides){
+      const n = d.rides.toLocaleString('en-IN');
+      $('odoTa').textContent = `இதுவரை பயணித்தவர்கள்: ${n}`;
+      $('odoEn').textContent = `${n} ${d.rides === 1 ? 'soul' : 'souls'} carried home`;
+      $('odometer').classList.add('on');
+    }
   };
   const beat = () => {
     if (wsOk) return; // socket is live — the server pushes instead
