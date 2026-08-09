@@ -169,6 +169,18 @@
     background:linear-gradient(to bottom,rgba(190,210,255,.07),transparent 60%),
       repeating-linear-gradient(90deg,transparent 0 110px,rgba(255,195,105,.06) 110px 150px,transparent 150px 260px)}
 
+  /* lightning (rain nights only) */
+  .lightning{position:absolute;inset:0;pointer-events:none;opacity:0;
+    background:radial-gradient(ellipse at 50% -10%,rgba(225,235,255,.95) 0%,rgba(185,205,255,.4) 42%,transparent 75%)}
+  .lightning.flash{animation:skyflash 1s ease-out}
+  @keyframes skyflash{
+    0%{opacity:0}4%{opacity:.9}10%{opacity:.08}
+    16%{opacity:.65}26%{opacity:.12}38%{opacity:.3}100%{opacity:0}}
+  .bolt{position:absolute;top:0;width:60px;height:46vh;left:50vw;opacity:0;pointer-events:none;
+    filter:drop-shadow(0 0 9px rgba(205,222,255,.95))}
+  .bolt.strike{animation:strike .55s ease-out}
+  @keyframes strike{0%{opacity:0}7%{opacity:1}17%{opacity:.15}25%{opacity:.85}100%{opacity:0}}
+
   /* passing headlights */
   .traffic{position:absolute;left:0;right:0;bottom:3.2vh;height:10vh;pointer-events:none;z-index:1}
   .headlights{position:absolute;bottom:1.2vh;left:0;display:flex;gap:9px;opacity:0;transform:translateX(108vw) scale(.5)}
@@ -402,6 +414,12 @@
   <div class="road"></div>
   <div class="traffic" id="traffic"><div class="headlights"><i></i><i></i></div></div>
   <div class="rainlayer"></div>
+  <div class="lightning" id="lightning"></div>
+  <svg class="bolt" id="bolt" viewBox="0 0 60 400" aria-hidden="true">
+    <polyline points="34,0 25,70 37,105 22,170 33,205 18,285 29,318 20,400"
+      fill="none" stroke="#e2ebff" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="22,170 14,220 20,248" fill="none" stroke="#e2ebff" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+  </svg>
   <div class="vignette"></div>
 </div>
 
@@ -611,6 +629,10 @@ const sfx = (() => {
     },
     kachunk(){ noise(0, 0.07, 320, 0.8); noise(0.06, 0.06, 150, 0.6); },
     stopBell(){ tone(988, 0, 0.7, 'triangle', 0.14); },
+    thunder(){ // distant rumble, arrives after the flash
+      noise(1.4, 1.8, 90, 0.22); noise(1.9, 2.4, 70, 0.16);
+    },
+    ready(){ return !!(c && c.state === 'running'); },
   };
 })();
 
@@ -763,6 +785,23 @@ knob.addEventListener('wheel', e => { e.preventDefault(); setVol(vol + (e.deltaY
 // some nights it rains on the route (force with ?rain in the URL)
 if (new URLSearchParams(location.search).has('rain') || Math.random() < 0.2)
   document.body.classList.add('rain');
+
+// lightning on rain nights: sky flash, sometimes a bolt, distant thunder
+(function scheduleLightning(){
+  setTimeout(() => {
+    if (document.body.classList.contains('rain')){
+      const L = $('lightning');
+      L.classList.remove('flash'); void L.offsetWidth; L.classList.add('flash');
+      if (Math.random() < 0.5){
+        const b = $('bolt');
+        b.style.left = (12 + Math.random() * 72) + 'vw';
+        b.classList.remove('strike'); void b.offsetWidth; b.classList.add('strike');
+      }
+      if (sfx.ready()) sfx.thunder(); // only audible once the rider has interacted
+    }
+    scheduleLightning();
+  }, 9000 + Math.random() * 17000);
+})();
 
 // oncoming traffic passes every so often
 (function schedulePass(){
