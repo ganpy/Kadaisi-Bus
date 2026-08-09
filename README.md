@@ -17,6 +17,28 @@ are hosted here; audio comes from a hidden [YouTube IFrame player](https://devel
 
 Playlist IDs live in the `ROUTES` config at the top of the script in `index.html`.
 
+## Rotating routes
+
+The bus stand is meant to change. Each route is one object in `ROUTES`:
+
+```js
+{
+  key: 'unique-slug',            // also drives the theme class if one exists
+  board: '35 · NEW ROUTE NAME',  // amber LED board text
+  sub: 'தமிழ் பெயர் — English name',
+  videos: ['id1', 'id2'],        // fixed queue of YouTube video IDs (preferred), OR
+  playlist: 'PL...',             // a curated YouTube playlist (never RD… mixes —
+                                 // those are personalized per viewer and drift)
+  visible: () => true,           // optional — e.g. only after midnight, weekends,
+                                 // or a festival week (Date-based checks work)
+}
+```
+
+To retire a route, comment its block out rather than deleting it — it can return
+any season. New routes automatically get boards, boarding, and the front sign;
+give them their own night theme by adding `body.theme-<key>` CSS (tint, moon,
+cassette label) alongside the existing four.
+
 ## The rules of the bus
 
 - Once you board, you ride: play/pause only — no skipping, no scrubbing, no song titles.
