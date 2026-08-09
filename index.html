@@ -322,6 +322,48 @@
   .clock-pill .riders{color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
   .clock-pill .riders:empty{display:none}
 
+  /* ---------- WINDOW POV: frame + sliding glass ---------- */
+  :root{--bf-x:clamp(10px,1.8vw,20px);--bf-t:clamp(8px,1.4vh,14px);--bf-b:clamp(14px,2.4vh,26px)}
+  .busframe{position:fixed;inset:0;z-index:6;pointer-events:none}
+  .bf-l,.bf-r{position:absolute;top:0;bottom:0;width:var(--bf-x)}
+  .bf-l{left:0;background:linear-gradient(90deg,#1c212e,#272e40 55%,#0a0d15)}
+  .bf-r{right:0;background:linear-gradient(270deg,#1c212e,#272e40 55%,#0a0d15)}
+  .bf-t{position:absolute;left:0;right:0;top:0;height:var(--bf-t);
+    background:linear-gradient(180deg,#232939,#141926 70%,#0a0d15)}
+  .bf-b{position:absolute;left:0;right:0;bottom:0;height:var(--bf-b);
+    background:linear-gradient(0deg,#1a1f2c,#2b3245 65%,#3a4258 92%,#12151f);
+    box-shadow:0 -1px 0 rgba(255,255,255,.14)} /* sill highlight — the armrest edge */
+  .bf-shadow{position:absolute;left:var(--bf-x);right:var(--bf-x);top:var(--bf-t);bottom:var(--bf-b);
+    border-radius:14px;box-shadow:inset 0 0 26px rgba(0,0,0,.55),inset 0 0 4px rgba(0,0,0,.6)}
+
+  .winglass{position:fixed;inset:0;z-index:5;pointer-events:none;
+    transform:translateX(103%);transition:transform .95s cubic-bezier(.45,0,.2,1);
+    background:
+      linear-gradient(105deg,transparent 8%,rgba(195,215,245,.075) 26%,transparent 40%,
+        rgba(195,215,245,.05) 58%,transparent 72%,rgba(195,215,245,.06) 88%,transparent 96%),
+      linear-gradient(180deg,rgba(165,190,225,.05),rgba(150,175,210,.035));
+    backdrop-filter:blur(1.3px) brightness(.95) saturate(.92);
+    -webkit-backdrop-filter:blur(1.3px) brightness(.95) saturate(.92)}
+  .winglass::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;
+    background:linear-gradient(90deg,#39404f,#5a6275 45%,#22293a);
+    box-shadow:2px 0 6px rgba(0,0,0,.4)}
+  body.win-closed .winglass{transform:translateX(0)}
+
+  /* rain beads and slides down the closed glass */
+  .glassdrops{position:absolute;inset:0;opacity:0;transition:opacity 1.5s ease;
+    background-image:
+      radial-gradient(2.5px 3.5px at 40px 60px,rgba(210,225,250,.5) 40%,rgba(210,225,250,.12) 70%,transparent 75%),
+      radial-gradient(2px 3px at 120px 140px,rgba(210,225,250,.45) 40%,transparent 75%),
+      radial-gradient(3px 4.5px at 220px 30px,rgba(210,225,250,.5) 40%,rgba(210,225,250,.1) 70%,transparent 75%),
+      radial-gradient(1.8px 2.6px at 300px 180px,rgba(210,225,250,.4) 40%,transparent 75%),
+      radial-gradient(2.2px 3.2px at 90px 240px,rgba(210,225,250,.45) 40%,transparent 75%),
+      radial-gradient(2.8px 4px at 260px 260px,rgba(210,225,250,.5) 40%,transparent 75%),
+      radial-gradient(1.6px 2.4px at 180px 90px,rgba(210,225,250,.35) 40%,transparent 75%);
+    background-size:340px 300px;background-repeat:repeat;
+    animation:dropslide 7s linear infinite}
+  @keyframes dropslide{from{background-position-y:0}to{background-position-y:300px}}
+  body.rain.win-closed .glassdrops{opacity:.65}
+
   /* the bus window — open hears the road, closed keeps just the music */
   .win-toggle{position:fixed;top:16px;right:16px;z-index:20;cursor:pointer;
     display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -515,6 +557,14 @@
   </div>
 </div>
 
+<div class="winglass" id="winGlass" aria-hidden="true">
+  <div class="glassdrops"></div>
+</div>
+<div class="busframe" aria-hidden="true">
+  <div class="bf-t"></div><div class="bf-b"></div>
+  <div class="bf-l"></div><div class="bf-r"></div>
+  <div class="bf-shadow"></div>
+</div>
 <button class="win-toggle" id="winToggle" aria-label="Bus window — open for road sounds, closed for music only" title="ஜன்னல்">
   <svg viewBox="0 0 30 24" width="26" height="21" aria-hidden="true">
     <rect x="1.5" y="1.5" width="27" height="21" rx="4" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
@@ -824,6 +874,7 @@ let windowOpen = localStorage.getItem('kb_window') !== 'closed';
 const winBtn = document.getElementById('winToggle');
 function renderWindow(){
   winBtn.classList.toggle('open', windowOpen);
+  document.body.classList.toggle('win-closed', !windowOpen);
   document.getElementById('winLbl').textContent = windowOpen ? 'ஜன்னல்' : 'மூடியது';
   winBtn.setAttribute('aria-pressed', String(windowOpen));
 }
