@@ -247,6 +247,8 @@
   @keyframes ping{75%,100%{transform:scale(2.4);opacity:0}}
   .clock-pill .svc{color:rgba(255,255,255,.65)}
   .clock-pill time{font-variant-numeric:tabular-nums}
+  .clock-pill .riders{color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
+  .clock-pill .riders:empty{display:none}
 
   /* bus front destination sign — lights up with the active route */
   .bus-sign{position:fixed;top:56px;left:50%;transform:translate(-50%,-14px);z-index:20;
@@ -403,6 +405,7 @@
     <span class="dot"><span class="ping"></span><span class="core"></span></span>
     <span class="svc">இரவு சேவை</span>
     <time id="clock">--:--</time>
+    <span class="riders" id="riders"></span>
   </div>
 </div>
 
@@ -728,6 +731,20 @@ if (new URLSearchParams(location.search).has('rain') || Math.random() < 0.2)
     schedulePass();
   }, 16000 + Math.random() * 16000);
 })();
+
+// riders on board — live count via a tiny heartbeat service ('' disables)
+const RIDERS_ENDPOINT = 'https://kadaisi-bus-production.up.railway.app';
+if (RIDERS_ENDPOINT){
+  const rid = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const beat = () => fetch(`${RIDERS_ENDPOINT}/beat?id=${rid}`)
+    .then(r => r.json())
+    .then(d => { if (d && d.riders) $('riders').textContent = `· ${d.riders} பயணிகள்`; })
+    .catch(() => {});
+  beat();
+  setInterval(beat, 30000);
+}
 
 // installable app shell (https + localhost only)
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost'))
