@@ -5,9 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Kadaisi Bus — கடைசி பஸ்</title>
 <meta name="description" content="Kadaisi Bus — Tamil songs for the last bus home."/>
+<meta name="theme-color" content="#050810"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Kadaisi Bus"/>
 <meta property="og:title" content="Kadaisi Bus — கடைசி பஸ்"/>
 <meta property="og:description" content="Tamil songs for the last bus home."/>
 <meta property="og:type" content="website"/>
+<meta property="og:image" content="opengraph.png"/><!-- TODO at deploy: absolute URL -->
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="675"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Kadaisi Bus — கடைசி பஸ்"/>
+<meta name="twitter:description" content="Tamil songs for the last bus home."/>
+<meta name="twitter:image" content="opengraph.png"/><!-- TODO at deploy: absolute URL -->
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32"/>
+<link rel="icon" href="favicon-16.png" type="image/png" sizes="16x16"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="manifest" href="site.webmanifest"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@500;700;800&family=VT323&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -680,6 +695,10 @@ if (new URLSearchParams(location.search).has('rain') || Math.random() < 0.2)
     schedulePass();
   }, 16000 + Math.random() * 16000);
 })();
+
+// installable app shell (https + localhost only)
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost'))
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 
 // spacebar toggles play
 document.addEventListener('keydown', e => {
