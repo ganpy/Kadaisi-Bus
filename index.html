@@ -41,7 +41,8 @@
     font-family:'Inter',system-ui,sans-serif;
     background:var(--sky-top);
     color:#fff;
-    overflow:hidden;
+    overflow-x:hidden;
+    overflow-y:auto; /* boards may outgrow short screens — sky & player stay fixed */
     -webkit-tap-highlight-color:transparent;
   }
   .route-btn,.bus-sign,.player,.clock-pill,.hero{
@@ -306,7 +307,8 @@
   .pick.hidden{opacity:0;transform:translateY(-6px);pointer-events:none}
 
   /* ---------- ROUTE BOARD TOGGLE ---------- */
-  .routes{position:relative;z-index:10;margin-top:2.2vh;display:flex;justify-content:center;gap:14px;padding:0 20px;flex-wrap:wrap}
+  .routes{position:relative;z-index:10;margin-top:2.2vh;display:flex;justify-content:center;gap:14px;
+    padding:0 20px calc(170px + 6vh);flex-wrap:wrap} /* bottom clearance so the last board scrolls above the fixed player */
   .route-btn{cursor:pointer;border:none;border-radius:10px;padding:10px 18px 8px;
     background:#0a0a0a;border:1px solid #2a2a2a;
     box-shadow:0 4px 20px rgba(0,0,0,.6),inset 0 0 18px rgba(0,0,0,.9);
@@ -728,7 +730,9 @@ function markActive(r, btn){
   $('bsBoard').textContent = 'ROUTE ' + r.board;
   $('bsTamil').textContent = r.sub.split('—')[0].trim();
   $('busSign').classList.add('on');
-  $('pickPrompt').classList.add('hidden');
+  const pick = $('pickPrompt');
+  pick.classList.add('hidden');
+  setTimeout(() => { pick.style.display = 'none'; }, 950); // reclaim its space after the fade
 }
 
 function setPlayIcon(playing){
