@@ -300,10 +300,11 @@
   .pick-tamil{font-family:'Baloo Thambi 2',sans-serif;font-weight:700;
     font-size:clamp(17px,2.4vw,22px);color:rgba(255,255,255,.88);
     text-shadow:0 2px 10px rgba(0,0,0,.6)}
-  .pick-en{margin-top:3px;font-size:12.5px;letter-spacing:.14em;text-indent:.14em;
-    color:rgba(255,255,255,.55);
+  .pick-en{margin-top:4px;font-size:14.5px;font-weight:600;letter-spacing:.14em;text-indent:.14em;
+    color:rgba(255,214,140,.95);
+    text-shadow:0 0 12px rgba(255,176,0,.45),0 1px 4px rgba(0,0,0,.6);
     animation:promptpulse 2.8s ease-in-out infinite}
-  @keyframes promptpulse{0%,100%{opacity:.5}50%{opacity:1}}
+  @keyframes promptpulse{0%,100%{opacity:.65}50%{opacity:1}}
   .pick.hidden{opacity:0;transform:translateY(-6px);pointer-events:none}
 
   /* ---------- ROUTE BOARD TOGGLE ---------- */
@@ -448,7 +449,7 @@
 </main>
 
 <div class="pick" id="pickPrompt" aria-hidden="true">
-  <div class="pick-tamil">எங்க போணும்?</div>
+  <div class="pick-tamil">எங்க போகணும்?</div>
   <div class="pick-en">Pick a Route to board</div>
 </div>
 
