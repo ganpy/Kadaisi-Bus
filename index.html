@@ -335,6 +335,25 @@
     box-shadow:0 -1px 0 rgba(255,255,255,.14)} /* sill highlight — the armrest edge */
   .bf-shadow{position:absolute;left:var(--bf-x);right:var(--bf-x);top:var(--bf-t);bottom:var(--bf-b);
     border-radius:14px;box-shadow:inset 0 0 26px rgba(0,0,0,.55),inset 0 0 4px rgba(0,0,0,.6)}
+  /* the two iron safety bars across the lower window (inside the glass) */
+  .bf-bar{position:fixed;left:var(--bf-x);right:var(--bf-x);height:5px;z-index:7;pointer-events:none;
+    background:linear-gradient(180deg,#454d61,#232836 55%,#0f1219);border-radius:3px;
+    box-shadow:0 2px 5px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.16)}
+  .bf-bar.b1{bottom:calc(var(--bf-b) + 14vh)}
+  .bf-bar.b2{bottom:calc(var(--bf-b) + 20.5vh)}
+  /* squeeze-latches on the side frames — they work */
+  .bf-latch{position:fixed;z-index:8;top:45%;width:15px;height:48px;padding:0;cursor:pointer;
+    pointer-events:auto;border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(90deg,#4a5266,#6d7690 40%,#2c3242);
+    box-shadow:2px 2px 7px rgba(0,0,0,.45)}
+  .bf-latch.l{left:var(--bf-x);border-radius:0 7px 7px 0;border-left:none}
+  .bf-latch.r{right:var(--bf-x);border-radius:7px 0 0 7px;border-right:none;
+    background:linear-gradient(270deg,#4a5266,#6d7690 40%,#2c3242)}
+  .bf-latch::before{content:'';position:absolute;left:3px;right:3px;top:9px;height:2px;
+    background:rgba(0,0,0,.4);box-shadow:0 6px 0 rgba(0,0,0,.4),0 12px 0 rgba(0,0,0,.4)}
+  .bf-latch::after{content:'';position:absolute;left:50%;bottom:7px;width:6px;height:6px;
+    margin-left:-3px;border-radius:50%;background:#151924;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}
+  .bf-latch:active{filter:brightness(1.25)}
 
   .winglass{position:fixed;inset:0;z-index:5;pointer-events:none;
     transform:translateX(103%);transition:transform .95s cubic-bezier(.45,0,.2,1);
@@ -372,7 +391,10 @@
     -webkit-user-select:none;user-select:none;transition:background .15s}
   .win-toggle:hover{background:rgba(255,255,255,.14)}
   .win-toggle:active{transform:scale(.95)}
-  .win-lbl{font-size:9.5px;color:rgba(255,255,255,.55);font-family:'Baloo Thambi 2',sans-serif}
+  .win-lbl{font-size:10px;font-family:'Baloo Thambi 2',sans-serif;display:flex;gap:4px;align-items:center}
+  .win-lbl span{color:rgba(255,255,255,.35);transition:color .3s}
+  .win-lbl .w-sep{color:rgba(255,255,255,.25)}
+  .win-lbl .on{color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,.5)}
   .win-pane-l{transition:transform .5s ease}
   .win-toggle.open .win-pane-l{transform:translateX(11.5px)}
   .win-toggle.open .win-pane-r{fill:rgba(10,18,38,.9)}
@@ -409,7 +431,8 @@
 
   /* ---------- CONDUCTOR'S CALL ---------- */
   .pick{position:relative;z-index:10;margin-top:4.5vh;text-align:center;padding:0 20px;
-    transition:opacity .9s ease,transform .9s ease;user-select:none;-webkit-user-select:none}
+    transition:opacity .9s ease,transform .9s ease;user-select:none;-webkit-user-select:none;
+    pointer-events:none}
   .pick-tamil{font-family:'Baloo Thambi 2',sans-serif;font-weight:700;
     font-size:clamp(17px,2.4vw,22px);color:rgba(255,255,255,.88);
     text-shadow:0 2px 10px rgba(0,0,0,.6)}
@@ -560,10 +583,14 @@
 <div class="winglass" id="winGlass" aria-hidden="true">
   <div class="glassdrops"></div>
 </div>
-<div class="busframe" aria-hidden="true">
+<div class="busframe">
   <div class="bf-t"></div><div class="bf-b"></div>
   <div class="bf-l"></div><div class="bf-r"></div>
   <div class="bf-shadow"></div>
+  <div class="bf-bar b1"></div>
+  <div class="bf-bar b2"></div>
+  <button class="bf-latch l" id="latchL" aria-label="Window latch — slide the window open or closed"></button>
+  <button class="bf-latch r" id="latchR" aria-label="Window latch — slide the window open or closed"></button>
 </div>
 <button class="win-toggle" id="winToggle" aria-label="Bus window — open for road sounds, closed for music only" title="ஜன்னல்">
   <svg viewBox="0 0 30 24" width="26" height="21" aria-hidden="true">
@@ -571,7 +598,7 @@
     <rect class="win-pane-r" x="15" y="3.5" width="11.5" height="17" rx="2" fill="rgba(180,205,255,.28)"/>
     <rect class="win-pane-l" x="3.5" y="3.5" width="11.5" height="17" rx="2" fill="rgba(180,205,255,.38)" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
   </svg>
-  <span class="win-lbl" id="winLbl">ஜன்னல்</span>
+  <span class="win-lbl"><span id="wOpen">திற</span><span class="w-sep">·</span><span id="wClose">மூடு</span></span>
 </button>
 <div class="bus-sign" id="busSign" aria-live="polite">
   <div class="bs-board" id="bsBoard"></div>
@@ -875,16 +902,20 @@ const winBtn = document.getElementById('winToggle');
 function renderWindow(){
   winBtn.classList.toggle('open', windowOpen);
   document.body.classList.toggle('win-closed', !windowOpen);
-  document.getElementById('winLbl').textContent = windowOpen ? 'ஜன்னல்' : 'மூடியது';
+  document.getElementById('wOpen').classList.toggle('on', windowOpen);
+  document.getElementById('wClose').classList.toggle('on', !windowOpen);
   winBtn.setAttribute('aria-pressed', String(windowOpen));
 }
 renderWindow();
-winBtn.addEventListener('click', () => {
+function toggleWindow(){
   windowOpen = !windowOpen;
   localStorage.setItem('kb_window', windowOpen ? 'open' : 'closed');
   renderWindow();
   if (sfx.ready() && !PLAIN) sfx.windowSlide();
-});
+}
+winBtn.addEventListener('click', toggleWindow);
+document.getElementById('latchL').addEventListener('click', toggleWindow);
+document.getElementById('latchR').addEventListener('click', toggleWindow);
 
 // YouTube IFrame API
 let player = null, ready = false, pendingRoute = null;
