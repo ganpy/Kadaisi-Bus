@@ -274,6 +274,35 @@
 
   /* the world only moves while the bus does (music playing) */
   body.moving .layer,body.moving .road::before{animation-play-state:running}
+  /* …except at a railway crossing, where everyone waits */
+  body.halted .layer,body.halted .road::before{animation-play-state:paused!important}
+
+  /* ---------- LEVEL CROSSING ---------- */
+  .crossing{position:fixed;right:-45vw;bottom:8.5vh;z-index:4;width:26vw;min-width:230px;height:32vh;
+    pointer-events:none;transition:right 2.2s ease-out}
+  .crossing.in{right:5vw}
+  .crossing.out{transition:right 1.6s ease-in;right:125vw}
+  .cr-post{position:absolute;right:0;bottom:0;width:11px;height:28vh;
+    background:linear-gradient(90deg,#232836,#12151f);border:1px solid #3a4152;border-radius:3px}
+  .cr-lamp{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:13px;height:13px;
+    border-radius:50%;background:#e33;opacity:.2}
+  .crossing.in .cr-lamp{animation:crlamp .85s steps(2) infinite}
+  @keyframes crlamp{50%{opacity:1;box-shadow:0 0 14px 5px rgba(255,60,60,.55)}}
+  .cr-pole{position:absolute;right:8px;bottom:calc(28vh - 14px);width:24vw;min-width:210px;height:9px;
+    border-radius:5px;transform-origin:right center;transform:rotate(75deg);
+    transition:transform 1.3s ease;
+    background:repeating-linear-gradient(90deg,#e8e0d0 0 26px,#c0392b 26px 52px);
+    box-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .crossing.closed .cr-pole{transform:rotate(0deg)}
+
+  .train{position:fixed;left:0;bottom:14vh;z-index:3;width:240vw;height:60px;pointer-events:none;
+    opacity:0;transform:translateX(120vw);
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='60' viewBox='0 0 180 60'><rect x='3' y='10' width='174' height='40' rx='6' fill='%23101528'/><rect x='8' y='50' width='164' height='5' fill='%23070b16'/><g fill='%23ffd98a' opacity='.85'><rect x='16' y='20' width='20' height='14' rx='2'/><rect x='48' y='20' width='20' height='14' rx='2'/><rect x='80' y='20' width='20' height='14' rx='2'/><rect x='112' y='20' width='20' height='14' rx='2'/><rect x='144' y='20' width='20' height='14' rx='2'/></g></svg>");
+    background-repeat:repeat-x;background-size:180px 60px}
+  .train.rtl{animation:train-rtl 5.6s linear forwards}
+  .train.ltr{animation:train-ltr 5.6s linear forwards}
+  @keyframes train-rtl{from{opacity:1;transform:translateX(115vw)}to{opacity:1;transform:translateX(-245vw)}}
+  @keyframes train-ltr{from{opacity:1;transform:translateX(-245vw)}to{opacity:1;transform:translateX(115vw)}}
 
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%),
@@ -451,6 +480,11 @@
   <div class="traffic" id="traffic"><div class="headlights"><i></i><i></i></div></div>
   <div class="rainlayer"></div>
   <div class="lightning" id="lightning"></div>
+  <div class="train" id="train"></div>
+  <div class="crossing" id="crossing">
+    <div class="cr-pole"></div>
+    <div class="cr-post"><span class="cr-lamp"></span></div>
+  </div>
   <svg class="bolt" id="bolt" viewBox="0 0 60 400" aria-hidden="true">
     <polyline points="34,0 25,70 37,105 22,170 33,205 18,285 29,318 20,400"
       fill="none" stroke="#e2ebff" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
@@ -665,20 +699,102 @@ const sfx = (() => {
     s.connect(f).connect(g).connect(a.destination);
     s.start(t);
   }
+  // --- continuous ambience: engine, rain patter, crickets ---
+  let engineN = null, engineOn = false;
+  let patterN = null, patterOn = false;
+  let cricketT = null, crBellT = null;
+  function engineSet(on){
+    if (on === engineOn) return;
+    engineOn = on;
+    const a = ctx();
+    if (on && !engineN){
+      const len = a.sampleRate * 2, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++){ last = (last + 0.025 * (Math.random() * 2 - 1)) / 1.025; d[i] = last * 4; }
+      const src = a.createBufferSource(); src.buffer = buf; src.loop = true;
+      const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 100;
+      const throb = a.createGain(); throb.gain.value = .85;
+      const lfo = a.createOscillator(); lfo.frequency.value = 8.5; // diesel idle throb
+      const lfog = a.createGain(); lfog.gain.value = .15;
+      lfo.connect(lfog); lfog.connect(throb.gain);
+      const g = a.createGain(); g.gain.value = 0;
+      src.connect(lp); lp.connect(throb); throb.connect(g); g.connect(a.destination);
+      src.start(); lfo.start();
+      engineN = g;
+    }
+    if (engineN){
+      engineN.gain.cancelScheduledValues(a.currentTime);
+      engineN.gain.setTargetAtTime(on ? .055 * master() : .0001, a.currentTime, on ? .6 : .35);
+    }
+  }
+  function patterSet(on){
+    if (on === patterOn) return;
+    patterOn = on;
+    const a = ctx();
+    if (on && !patterN){
+      const len = a.sampleRate, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      const src = a.createBufferSource(); src.buffer = buf; src.loop = true;
+      const hp = a.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400;
+      const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+      const g = a.createGain(); g.gain.value = 0;
+      src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(a.destination);
+      src.start();
+      patterN = g;
+    }
+    if (patterN){
+      patterN.gain.cancelScheduledValues(a.currentTime);
+      patterN.gain.setTargetAtTime(on ? .035 * master() : .0001, a.currentTime, .8);
+    }
+  }
+  function cricketsSet(on){
+    if (on && !cricketT){
+      cricketT = setInterval(() => {
+        if (Math.random() < .45)
+          for (let k = 0; k < 3; k++) tone(4300 + Math.random() * 200, k * .055, .02, 'sine', .04);
+      }, 420);
+    } else if (!on && cricketT){ clearInterval(cricketT); cricketT = null; }
+  }
+  function crossingBell(on){
+    if (on && !crBellT){
+      crBellT = setInterval(() => { tone(872, 0, .13, 'square', .06); tone(1308, 0, .09, 'sine', .02); }, 480);
+    } else if (!on && crBellT){ clearInterval(crBellT); crBellT = null; }
+  }
+  function trainHorn(){
+    const a = ctx();
+    [311, 392].forEach(f => {
+      const o = a.createOscillator(), g = a.createGain(), lp = a.createBiquadFilter();
+      o.type = 'sawtooth'; o.frequency.value = f;
+      lp.type = 'lowpass'; lp.frequency.value = 900;
+      const t = a.currentTime;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.05 * master(), t + .08);
+      g.gain.setValueAtTime(.05 * master(), t + .85);
+      g.gain.exponentialRampToValueAtTime(.0001, t + 1.25);
+      o.connect(lp); lp.connect(g); g.connect(a.destination);
+      o.start(t); o.stop(t + 1.3);
+    });
+  }
   return {
-    board(){ // door hiss, then the conductor's double bell
+    board(){ // door hiss, conductor's double bell, then the ticket punch
       noise(0, 0.5, 900, 0.5);
       tone(988, 0.5, 0.55, 'triangle', 0.32); tone(1319, 0.52, 0.4, 'sine', 0.12);
       tone(988, 0.82, 0.6, 'triangle', 0.28); tone(1319, 0.84, 0.4, 'sine', 0.1);
+      noise(1.18, 0.035, 2600, 0.4, 'highpass');
+      noise(1.28, 0.05, 1400, 0.5, 'bandpass');
     },
     kachunk(){ noise(0, 0.07, 320, 0.8); noise(0.06, 0.06, 150, 0.6); },
     stopBell(){ tone(988, 0, 0.7, 'triangle', 0.14); },
     thunder(){ // distant rumble, arrives after the flash
       noise(1.4, 1.8, 90, 0.22); noise(1.9, 2.4, 70, 0.16);
     },
+    templeBell(){ tone(523, 0, 2.2, 'sine', .06); tone(1046, .02, 1.4, 'sine', .025); tone(1570, .03, .8, 'sine', .012); },
+    trainRumble(){ noise(0, 5, 140, .3); },
+    engineSet, patterSet, cricketsSet, crossingBell, trainHorn,
     ready(){ return !!(c && c.state === 'running'); },
   };
 })();
+const PLAIN = new URLSearchParams(location.search).has('plain'); // ?plain silences ambience for A/B
 
 // YouTube IFrame API
 let player = null, ready = false, pendingRoute = null;
@@ -808,6 +924,11 @@ setInterval(() => {
   $('cassette').classList.toggle('playing', playing);
   document.body.classList.toggle('moving', playing);
   setPlayIcon(playing);
+  if (!PLAIN && sfx.ready()){
+    sfx.engineSet(playing);
+    sfx.patterSet(document.body.classList.contains('rain'));
+    sfx.cricketsSet(playing && document.body.classList.contains('zone-country'));
+  }
   const d = player.getVideoData && player.getVideoData();
   if (playing && d && d.video_id){
     if (lastVideoId && lastVideoId !== d.video_id) sfx.stopBell();
@@ -873,8 +994,47 @@ setInterval(() => {
     leg = (leg + 1) % JOURNEY.length;
     document.body.classList.remove('zone-city','zone-country','zone-village');
     if (JOURNEY[leg][0] !== 'city') document.body.classList.add('zone-' + JOURNEY[leg][0]);
+    if (JOURNEY[leg][0] === 'village' && !PLAIN && sfx.ready())
+      setTimeout(() => sfx.templeBell(), 4000 + Math.random() * 8000);
   }
 }, 1000);
+
+// the level crossing — a rare set piece. The bus halts at the gate, a night
+// train clatters across with lit windows, the gate lifts, the ride goes on.
+// Force an early one with ?crossing in the URL.
+const CROSSING_TEST = new URLSearchParams(location.search).has('crossing');
+let crossingActive = false, crossingTimer = null;
+function scheduleCrossing(delayMs){
+  clearTimeout(crossingTimer);
+  crossingTimer = setTimeout(tryCrossing, delayMs);
+}
+function tryCrossing(){
+  if (crossingActive || !document.body.classList.contains('moving')){
+    scheduleCrossing(45000);
+    return;
+  }
+  crossingActive = true;
+  const gate = $('crossing'), train = $('train');
+  const sound = !PLAIN && sfx.ready();
+  gate.classList.add('in');
+  if (sound) sfx.crossingBell(true);
+  setTimeout(() => gate.classList.add('closed'), 1400);
+  setTimeout(() => document.body.classList.add('halted'), 2300);
+  setTimeout(() => { if (sound) sfx.trainHorn(); }, 3000);
+  setTimeout(() => {
+    train.classList.add(Math.random() < .5 ? 'rtl' : 'ltr');
+    if (sound) sfx.trainRumble();
+  }, 3800);
+  setTimeout(() => train.classList.remove('rtl','ltr'), 9600);
+  setTimeout(() => { sfx.crossingBell(false); gate.classList.remove('closed'); }, 9800);
+  setTimeout(() => { document.body.classList.remove('halted'); gate.classList.add('out'); }, 11200);
+  setTimeout(() => {
+    gate.classList.remove('in','out');
+    crossingActive = false;
+    scheduleCrossing(420000 + Math.random() * 480000); // next one in 7-15 min
+  }, 13500);
+}
+scheduleCrossing(CROSSING_TEST ? 8000 : 240000 + Math.random() * 300000);
 
 // oncoming traffic passes every so often
 (function schedulePass(){
