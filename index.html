@@ -607,12 +607,20 @@ function boardRoute(r, btn){
   const load = () => {
     lastVideoId = null;
     // Start playback inside the click's autoplay grace window — no delayed song-jump,
-    // or fresh visitors get a silently paused player. Mixes (RD…) open with their seed
-    // song; curated playlists board at a random point instead.
-    const isMix = r.playlist.startsWith('RD');
-    const idx = (!isMix && r.length) ? Math.floor(Math.random() * r.length) : 0;
-    player.loadPlaylist({ listType: 'playlist', list: r.playlist, index: idx });
-    // once ingested: always loop; shuffle only curated playlists (mixes keep radio order)
+    // or fresh visitors get a silently paused player.
+    // Route sources, most to least controlled:
+    //   videos: [...]  — explicit video IDs, identical for every rider (preferred)
+    //   PL… playlist   — curated YouTube playlist, boards at a random point
+    //   RD… mix        — YouTube auto-radio; PERSONALIZED per viewer, can drift
+    //                    off-language/era. Avoid for routes that promise a sound.
+    const isMix = !r.videos && r.playlist.startsWith('RD');
+    if (r.videos){
+      player.loadPlaylist(r.videos, Math.floor(Math.random() * r.videos.length));
+    } else {
+      const idx = (!isMix && r.length) ? Math.floor(Math.random() * r.length) : 0;
+      player.loadPlaylist({ listType: 'playlist', list: r.playlist, index: idx });
+    }
+    // once ingested: always loop; shuffle everything except mixes (radio keeps its order)
     setTimeout(() => { try { player.setLoop(true); if (!isMix) player.setShuffle(true); } catch(e){} }, 1200);
     // mixes can ingest slowly and land paused — keep nudging until playback actually starts
     clearInterval(kickTimer);
