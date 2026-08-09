@@ -322,6 +322,19 @@
   .clock-pill .riders{color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
   .clock-pill .riders:empty{display:none}
 
+  /* the bus window — open hears the road, closed keeps just the music */
+  .win-toggle{position:fixed;top:16px;right:16px;z-index:20;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:8px 12px;border:1px solid rgba(255,255,255,.14);border-radius:14px;
+    background:rgba(255,255,255,.07);backdrop-filter:blur(14px);
+    -webkit-user-select:none;user-select:none;transition:background .15s}
+  .win-toggle:hover{background:rgba(255,255,255,.14)}
+  .win-toggle:active{transform:scale(.95)}
+  .win-lbl{font-size:9.5px;color:rgba(255,255,255,.55);font-family:'Baloo Thambi 2',sans-serif}
+  .win-pane-l{transition:transform .5s ease}
+  .win-toggle.open .win-pane-l{transform:translateX(11.5px)}
+  .win-toggle.open .win-pane-r{fill:rgba(10,18,38,.9)}
+
   /* bus front destination sign — lights up with the active route */
   .bus-sign{position:fixed;top:56px;left:50%;transform:translate(-50%,-14px);z-index:20;
     background:#0a0a0a;border:1px solid #333;border-radius:9px;padding:7px 22px 6px;
@@ -502,6 +515,14 @@
   </div>
 </div>
 
+<button class="win-toggle" id="winToggle" aria-label="Bus window — open for road sounds, closed for music only" title="ஜன்னல்">
+  <svg viewBox="0 0 30 24" width="26" height="21" aria-hidden="true">
+    <rect x="1.5" y="1.5" width="27" height="21" rx="4" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+    <rect class="win-pane-r" x="15" y="3.5" width="11.5" height="17" rx="2" fill="rgba(180,205,255,.28)"/>
+    <rect class="win-pane-l" x="3.5" y="3.5" width="11.5" height="17" rx="2" fill="rgba(180,205,255,.38)" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
+  </svg>
+  <span class="win-lbl" id="winLbl">ஜன்னல்</span>
+</button>
 <div class="bus-sign" id="busSign" aria-live="polite">
   <div class="bs-board" id="bsBoard"></div>
   <div class="bs-tamil" id="bsTamil"></div>
@@ -789,12 +810,30 @@ const sfx = (() => {
       noise(1.4, 1.8, 90, 0.22); noise(1.9, 2.4, 70, 0.16);
     },
     templeBell(){ tone(523, 0, 2.2, 'sine', .06); tone(1046, .02, 1.4, 'sine', .025); tone(1570, .03, .8, 'sine', .012); },
+    windowSlide(){ noise(0, .16, 600, .3, 'bandpass'); noise(.14, .05, 220, .5); },
     trainRumble(){ noise(0, 5, 140, .3); },
     engineSet, patterSet, cricketsSet, crossingBell, trainHorn,
     ready(){ return !!(c && c.state === 'running'); },
   };
 })();
 const PLAIN = new URLSearchParams(location.search).has('plain'); // ?plain silences ambience for A/B
+
+// the bus window: open = engine hum & rain reach you; closed = just the music.
+// Episodic sounds (bells, crickets, crossings) come through either way.
+let windowOpen = localStorage.getItem('kb_window') !== 'closed';
+const winBtn = document.getElementById('winToggle');
+function renderWindow(){
+  winBtn.classList.toggle('open', windowOpen);
+  document.getElementById('winLbl').textContent = windowOpen ? 'ஜன்னல்' : 'மூடியது';
+  winBtn.setAttribute('aria-pressed', String(windowOpen));
+}
+renderWindow();
+winBtn.addEventListener('click', () => {
+  windowOpen = !windowOpen;
+  localStorage.setItem('kb_window', windowOpen ? 'open' : 'closed');
+  renderWindow();
+  if (sfx.ready() && !PLAIN) sfx.windowSlide();
+});
 
 // YouTube IFrame API
 let player = null, ready = false, pendingRoute = null;
@@ -925,8 +964,8 @@ setInterval(() => {
   document.body.classList.toggle('moving', playing);
   setPlayIcon(playing);
   if (!PLAIN && sfx.ready()){
-    sfx.engineSet(playing);
-    sfx.patterSet(document.body.classList.contains('rain'));
+    sfx.engineSet(playing && windowOpen);
+    sfx.patterSet(windowOpen && document.body.classList.contains('rain'));
     sfx.cricketsSet(playing && document.body.classList.contains('zone-country'));
   }
   const d = player.getVideoData && player.getVideoData();
