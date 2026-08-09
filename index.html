@@ -429,7 +429,7 @@
 <div class="topbar">
   <div class="clock-pill" aria-live="polite">
     <span class="dot"><span class="ping"></span><span class="core"></span></span>
-    <span class="svc">இரவு சேவை</span>
+    <span class="svc" id="svc">இரவு சேவை</span>
     <time id="clock">--:--</time>
     <span class="riders" id="riders"></span>
   </div>
@@ -561,6 +561,9 @@ let kickTimer = null;
 function tick(){
   const d = new Date();
   let h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
+  // the depot board tells the truth: morning / day / night service by local clock
+  $('svc').textContent = (h >= 20 || h < 5) ? 'இரவு சேவை'
+    : (h < 12) ? 'காலை சேவை' : 'பகல் சேவை';
   const ap = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
   $('clock').textContent = `${h}:${m} ${ap}`;
