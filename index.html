@@ -461,8 +461,8 @@ const ROUTES = [
     board: '00 · PAATHI RAATHIRI',
     sub: 'பாதி ராத்திரி — The Midnight Run',
     playlist: 'RDiQHezTk2QBo', // Mix radio seeded from user's midnight pick iQHezTk2QBo
-    // secret route: only appears between midnight and 5 AM (or with ?midnight in the URL)
-    visible: () => new URLSearchParams(location.search).has('midnight') || new Date().getHours() < 5,
+    // secret route: only appears between midnight and 3 AM (or with ?midnight in the URL)
+    visible: () => new URLSearchParams(location.search).has('midnight') || new Date().getHours() < 3,
   },
 ];
 /* ============================================================ */
