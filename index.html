@@ -206,19 +206,20 @@
     background:radial-gradient(circle at 68% 30%,rgba(0,0,0,.08) 6px,transparent 7px),
       radial-gradient(circle at 40% 62%,rgba(0,0,0,.07) 9px,transparent 10px);}
 
-  .layer{position:absolute;left:0;right:0;bottom:0;background-repeat:repeat-x;pointer-events:none}
-  /* far skyline: slow */
+  .layer{position:absolute;left:0;right:0;bottom:0;background-repeat:repeat-x;pointer-events:none;
+    animation-play-state:paused}
+  /* far skyline (with a distant gopuram): slow */
   .skyline-far{height:26vh;opacity:.75;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='260' viewBox='0 0 1200 260'><g fill='%23070c1c'><rect x='30' y='120' width='90' height='140'/><rect x='140' y='80' width='60' height='180'/><rect x='220' y='150' width='110' height='110'/><rect x='360' y='100' width='70' height='160'/><rect x='450' y='170' width='120' height='90'/><rect x='600' y='90' width='55' height='170'/><rect x='680' y='140' width='95' height='120'/><rect x='800' y='110' width='65' height='150'/><rect x='890' y='160' width='120' height='100'/><rect x='1040' y='95' width='75' height='165'/></g><g fill='%23ffcf6e' opacity='.5'><rect x='45' y='135' width='6' height='8'/><rect x='75' y='160' width='6' height='8'/><rect x='155' y='95' width='6' height='8'/><rect x='170' y='130' width='6' height='8'/><rect x='245' y='165' width='6' height='8'/><rect x='380' y='115' width='6' height='8'/><rect x='395' y='150' width='6' height='8'/><rect x='480' y='185' width='6' height='8'/><rect x='615' y='105' width='6' height='8'/><rect x='700' y='155' width='6' height='8'/><rect x='730' y='185' width='6' height='8'/><rect x='815' y='125' width='6' height='8'/><rect x='920' y='175' width='6' height='8'/><rect x='1055' y='110' width='6' height='8'/><rect x='1070' y='145' width='6' height='8'/></g></svg>");
-    background-size:1200px 26vh;animation:scroll 90s linear infinite;}
-  /* near buildings + shops: faster */
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='260' viewBox='0 0 1200 260'><g fill='%23070c1c'><rect x='30' y='120' width='90' height='140'/><rect x='140' y='80' width='60' height='180'/><rect x='220' y='150' width='110' height='110'/><rect x='360' y='100' width='70' height='160'/><polygon points='455,260 455,150 465,150 468,122 476,122 482,96 490,96 496,72 505,58 514,72 520,96 528,96 534,122 542,122 545,150 555,150 555,260'/><circle cx='505' cy='52' r='5'/><rect x='600' y='90' width='55' height='170'/><rect x='680' y='140' width='95' height='120'/><rect x='800' y='110' width='65' height='150'/><rect x='890' y='160' width='120' height='100'/><rect x='1040' y='95' width='75' height='165'/></g><g fill='%23ffcf6e' opacity='.5'><rect x='45' y='135' width='6' height='8'/><rect x='75' y='160' width='6' height='8'/><rect x='155' y='95' width='6' height='8'/><rect x='170' y='130' width='6' height='8'/><rect x='245' y='165' width='6' height='8'/><rect x='380' y='115' width='6' height='8'/><rect x='395' y='150' width='6' height='8'/><rect x='500' y='90' width='10' height='5' opacity='.7'/><rect x='494' y='128' width='22' height='5' opacity='.55'/><rect x='615' y='105' width='6' height='8'/><rect x='700' y='155' width='6' height='8'/><rect x='730' y='185' width='6' height='8'/><rect x='815' y='125' width='6' height='8'/><rect x='920' y='175' width='6' height='8'/><rect x='1055' y='110' width='6' height='8'/><rect x='1070' y='145' width='6' height='8'/></g></svg>");
+    background-size:1200px 26vh;animation:scroll 90s linear infinite;animation-play-state:paused}
+  /* near buildings + shops + palms: faster */
   .skyline-near{height:20vh;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='200' viewBox='0 0 1400 200'><g fill='%23030614'><rect x='60' y='60' width='150' height='140'/><rect x='260' y='100' width='120' height='100'/><rect x='430' y='40' width='90' height='160'/><rect x='570' y='110' width='170' height='90'/><rect x='790' y='70' width='110' height='130'/><rect x='950' y='120' width='150' height='80'/><rect x='1150' y='55' width='120' height='145'/></g><g fill='%23ffd98a' opacity='.35'><rect x='80' y='80' width='10' height='12'/><rect x='120' y='80' width='10' height='12'/><rect x='160' y='110' width='10' height='12'/><rect x='285' y='120' width='10' height='12'/><rect x='450' y='60' width='10' height='12'/><rect x='480' y='95' width='10' height='12'/><rect x='600' y='130' width='10' height='12'/><rect x='660' y='130' width='10' height='12'/><rect x='815' y='90' width='10' height='12'/><rect x='980' y='140' width='10' height='12'/><rect x='1180' y='75' width='10' height='12'/><rect x='1215' y='110' width='10' height='12'/></g></svg>");
-    background-size:1400px 20vh;animation:scroll 45s linear infinite;}
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='200' viewBox='0 0 1400 200'><g fill='%23030614'><rect x='60' y='60' width='150' height='140'/><rect x='260' y='100' width='120' height='100'/><rect x='430' y='40' width='90' height='160'/><rect x='570' y='110' width='170' height='90'/><rect x='790' y='70' width='110' height='130'/><rect x='950' y='120' width='150' height='80'/><rect x='1150' y='55' width='120' height='145'/></g><g stroke='%23030614' fill='none' stroke-linecap='round'><path d='M410 200 C408 170 412 140 406 118' stroke-width='6'/><path d='M406 118 C394 110 382 110 371 117' stroke-width='4'/><path d='M406 118 C399 104 388 98 375 99' stroke-width='4'/><path d='M406 118 C412 104 422 98 435 99' stroke-width='4'/><path d='M406 118 C418 110 429 111 439 118' stroke-width='4'/><path d='M406 118 C404 106 402 99 401 93' stroke-width='4'/><path d='M1330 200 C1328 174 1332 148 1326 128' stroke-width='6'/><path d='M1326 128 C1315 121 1304 121 1294 127' stroke-width='4'/><path d='M1326 128 C1320 115 1310 109 1298 110' stroke-width='4'/><path d='M1326 128 C1331 115 1341 109 1353 110' stroke-width='4'/><path d='M1326 128 C1337 121 1347 122 1356 128' stroke-width='4'/></g><g fill='%23ffd98a' opacity='.35'><rect x='80' y='80' width='10' height='12'/><rect x='120' y='80' width='10' height='12'/><rect x='160' y='110' width='10' height='12'/><rect x='285' y='120' width='10' height='12'/><rect x='450' y='60' width='10' height='12'/><rect x='480' y='95' width='10' height='12'/><rect x='600' y='130' width='10' height='12'/><rect x='660' y='130' width='10' height='12'/><rect x='815' y='90' width='10' height='12'/><rect x='980' y='140' width='10' height='12'/><rect x='1180' y='75' width='10' height='12'/><rect x='1215' y='110' width='10' height='12'/></g></svg>");
+    background-size:1400px 20vh;animation:scroll 45s linear infinite;animation-play-state:paused}
   /* streetlight poles: fastest */
   .streetlights{height:34vh;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='340' viewBox='0 0 700 340'><rect x='348' y='60' width='5' height='280' fill='%23020409'/><rect x='320' y='55' width='62' height='7' rx='3' fill='%23020409'/><circle cx='330' cy='68' r='7' fill='%23ffc966'/><circle cx='330' cy='68' r='16' fill='%23ffc966' opacity='.25'/><circle cx='330' cy='68' r='30' fill='%23ffc966' opacity='.08'/></svg>");
-    background-size:700px 34vh;animation:scroll 12s linear infinite;}
+    background-size:700px 34vh;animation:scroll 12s linear infinite;animation-play-state:paused}
   @keyframes scroll{from{background-position-x:0}to{background-position-x:-1400px}}
   .skyline-far{animation-name:scroll-far}
   @keyframes scroll-far{from{background-position-x:0}to{background-position-x:-1200px}}
@@ -229,8 +230,12 @@
   .road{position:absolute;left:0;right:0;bottom:0;height:9vh;background:linear-gradient(to bottom,#0b0e18,#06080f)}
   .road::before{content:'';position:absolute;left:0;right:0;top:45%;height:4px;
     background-image:linear-gradient(90deg,#c9a94e 0 60px,transparent 60px 140px);
-    background-size:140px 4px;opacity:.55;animation:lane .55s linear infinite;}
+    background-size:140px 4px;opacity:.55;animation:lane .55s linear infinite;
+    animation-play-state:paused}
   @keyframes lane{from{background-position-x:0}to{background-position-x:-140px}}
+
+  /* the world only moves while the bus does (music playing) */
+  body.moving .layer,body.moving .road::before{animation-play-state:running}
 
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%),
@@ -491,13 +496,33 @@ const ROUTES = [
     key: 'kaadhal',
     board: '60 · KAADHAL DELUXE',
     sub: 'காதல் டீலக்ஸ் — Romance Special',
-    playlist: 'RDzZ8MxSu9G0M', // Mix radio seeded from user's 1960s romance song zZ8MxSu9G0M
+    // Kaadhal Deluxe = 1960s romance. Fixed queue, same for every rider.
+    videos: [
+      'zZ8MxSu9G0M', // Thoongatha Kannendru — Kungumam (user's pick)
+      '1FFCWnEvfZQ', // Anubhavam Pudhumai — Kadhalikka Neramillai (MSV-TKR)
+      '8pHKCca-DFI', // Nenjam Marappathillai — Nenjam Marappathillai (1963)
+      '2AAD_dLr2Wg', // Ninaippathellam Nadanthuvittal — Nenjil Or Aalayam
+      'QaG7EZWz5tw', // Sonnathu Neethaana — Nenjil Or Aalayam
+      'k2WRMygBvGE', // Pon Enben Siru Poo Enben — Policekaran Magal
+      'NgcoYz2zFV0', // Kaalangalil Aval Vasantham — Paava Mannippu (PBS)
+      'vCnGatVR25A', // Oho Endhan Baby — Then Nilavu
+      'vTqTywNxW58', // Naan Pesa Ninaippathellam — Paalum Pazhamum
+      'nzVUwY2e3W0', // Malarnthum Malaradha — Pasamalar
+      'pqgAS7mzZjA', // Roja Malarae Rajakumari — Veerathirumagan
+      'ONHG8_zF9K0', // Unnai Ondru Ketpen — Puthiya Paravai
+      'JQJs1hs99Wk', // Paartha Nyabagam Illaiyo — Puthiya Paravai
+      'qIwwwaNI8D8', // Avalukkenna Azhagiya Mugam — Server Sundaram
+      'ON3URJu2a2o', // Anbe Vaa (title) — Anbe Vaa (TMS)
+    ],
+    playlist: '', // unused while `videos` is set
   },
   {
     key: 'midnight',
     board: '00 · PAATHI RAATHIRI',
     sub: 'பாதி ராத்திரி — The Midnight Run',
-    playlist: 'RDiQHezTk2QBo', // Mix radio seeded from user's midnight pick iQHezTk2QBo
+    // Midnight Masala jukebox (user's pick) — catchy late-night numbers, loops.
+    videos: ['oFP3ib8JtaI'],
+    playlist: '', // unused while `videos` is set
     // secret route: only appears between midnight and 3 AM (or with ?midnight in the URL)
     visible: () => new URLSearchParams(location.search).has('midnight') || new Date().getHours() < 3,
   },
@@ -609,6 +634,7 @@ window.onYouTubeIframeAPIReady = function(){
       onStateChange(e){
         const playing = e.data === YT.PlayerState.PLAYING;
         $('cassette').classList.toggle('playing', playing);
+        document.body.classList.toggle('moving', playing);
         setPlayIcon(playing);
       },
       onError(){ player.nextVideo(); }, // skip unplayable/region-blocked videos
@@ -704,6 +730,7 @@ setInterval(() => {
   if (!ready || !player.getPlayerState) return;
   const playing = player.getPlayerState() === 1;
   $('cassette').classList.toggle('playing', playing);
+  document.body.classList.toggle('moving', playing);
   setPlayIcon(playing);
   const d = player.getVideoData && player.getVideoData();
   if (playing && d && d.video_id){
