@@ -318,6 +318,8 @@
   .hero .latin{margin-top:2px;font-size:clamp(13px,2vw,17px);letter-spacing:.42em;text-indent:.42em;
     font-weight:600;color:rgba(255,255,255,.85);text-transform:uppercase}
   .hero .tag{margin-top:10px;font-size:clamp(12px,1.6vw,14px);color:rgba(255,255,255,.55);font-style:italic}
+  .hero .odo{margin-top:8px;font-size:12.5px;color:rgba(255,214,140,.55);font-variant-numeric:tabular-nums}
+  .hero .odo:empty{display:none}
 
   /* ---------- CONDUCTOR'S CALL ---------- */
   .pick{position:relative;z-index:10;margin-top:4.5vh;text-align:center;padding:0 20px;
@@ -475,6 +477,7 @@
     <div class="latin">Kadaisi Bus</div>
   </h1>
   <p class="tag">Tamil songs for the last bus home.</p>
+  <p class="odo" id="odometer"></p>
 </main>
 
 <div class="pick" id="pickPrompt" aria-hidden="true">
@@ -705,6 +708,14 @@ function boardRoute(r, btn){
   const isSwap = !!activeRoute && activeRoute !== r;
   markActive(r, btn);
   sfx.board();
+  // one பயணம் on the odometer per visiting session
+  if (!sessionStorage.getItem('kb_rode')){
+    sessionStorage.setItem('kb_rode', '1');
+    try {
+      if (liveWS && liveWS.readyState === 1) liveWS.send('ride');
+      else fetch(RIDERS_ENDPOINT + '/ride').catch(() => {});
+    } catch(e){}
+  }
   const cas = $('cassette');
   const load = () => {
     lastVideoId = null;
@@ -870,21 +881,34 @@ setInterval(() => {
   }, 16000 + Math.random() * 16000);
 })();
 
-// riders on board — live count via a tiny heartbeat service ('' disables)
+// riders on board (live over WebSocket, polling fallback) + lifetime odometer
 const RIDERS_ENDPOINT = 'https://kadaisi-bus-production.up.railway.app';
+let liveWS = null, wsOk = false;
 if (RIDERS_ENDPOINT){
   const rid = (window.crypto && crypto.randomUUID)
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2) + Date.now().toString(36);
-  const beat = () => fetch(`${RIDERS_ENDPOINT}/beat?id=${rid}`)
-    .then(r => r.json())
-    .then(d => {
-      if (d && d.riders)
-        $('riders').textContent = `· ${d.riders} ${d.riders === 1 ? 'பயணி' : 'பயணிகள்'}`;
-    })
-    .catch(() => {});
+  const show = d => {
+    if (d && d.riders)
+      $('riders').textContent = `· ${d.riders} ${d.riders === 1 ? 'பயணி' : 'பயணிகள்'}`;
+    if (d && d.rides)
+      $('odometer').textContent = `இது வரை ${d.rides.toLocaleString('en-IN')} பயணங்கள்`;
+  };
+  const beat = () => {
+    if (wsOk) return; // socket is live — the server pushes instead
+    fetch(`${RIDERS_ENDPOINT}/beat?id=${rid}`).then(r => r.json()).then(show).catch(() => {});
+  };
+  (function connect(){
+    let s;
+    try { s = new WebSocket(RIDERS_ENDPOINT.replace(/^http/, 'ws') + '/ws'); } catch(e){ return; }
+    liveWS = s;
+    s.onopen = () => { wsOk = true; };
+    s.onmessage = e => { try { show(JSON.parse(e.data)); } catch(err){} };
+    s.onclose = () => { wsOk = false; setTimeout(connect, 3000 + Math.random() * 5000); };
+    s.onerror = () => { try { s.close(); } catch(e){} };
+  })();
   beat();
-  setTimeout(beat, 4000);      // catch riders who boarded in the same moment
+  setTimeout(beat, 4000);
   setInterval(beat, 15000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
 }
