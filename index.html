@@ -770,8 +770,13 @@ setInterval(() => {
   }
 }, 500);
 
-// rotary volume knob — drag to turn, or scroll over it
+// rotary volume knob — drag to turn, or scroll over it.
+// iOS forbids web pages from setting media volume (hardware buttons only),
+// so the knob would spin without effect there — hide it.
 const knob = $('vol');
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (isIOS) knob.style.display = 'none';
 function applyVol(){
   knob.style.setProperty('--rot', (-135 + vol * 2.7) + 'deg');
   knob.setAttribute('aria-valuenow', vol);
