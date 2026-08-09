@@ -878,10 +878,15 @@ if (RIDERS_ENDPOINT){
     : Math.random().toString(36).slice(2) + Date.now().toString(36);
   const beat = () => fetch(`${RIDERS_ENDPOINT}/beat?id=${rid}`)
     .then(r => r.json())
-    .then(d => { if (d && d.riders) $('riders').textContent = `· ${d.riders} பயணிகள்`; })
+    .then(d => {
+      if (d && d.riders)
+        $('riders').textContent = `· ${d.riders} ${d.riders === 1 ? 'பயணி' : 'பயணிகள்'}`;
+    })
     .catch(() => {});
   beat();
-  setInterval(beat, 30000);
+  setTimeout(beat, 4000);      // catch riders who boarded in the same moment
+  setInterval(beat, 15000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
 }
 
 // installable app shell (https + localhost only)
