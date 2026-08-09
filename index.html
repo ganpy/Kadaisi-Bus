@@ -463,7 +463,22 @@ const ROUTES = [
     key: 'nilamail',
     board: '47 · NILA MAIL',
     sub: 'நிலா மெயில் — Moon Mail',
-    playlist: 'RDWUulOVn-pEs', // Mix radio seeded from user's video WUulOVn-pEs
+    // Moon Mail = moon songs only (நிலா பாட்டுகள்). Fixed queue, same for every rider.
+    videos: [
+      '4DVWr7KgbGU', // Nilave Vaa — Mouna Ragam (Ilaiyaraaja, SPB)
+      'PHxN_S8ufMw', // Nilave Ennidam Nerungadhe — Ramu (PBS, Kannadasan)
+      'Ns6jhsVbUqY', // Andru Vanthathum Idhe Nila — MGR (TMS)
+      'uSBJ-T9P_S8', // Nilavukku En Mel Ennadi Kobam — Policekaran Magal
+      'zIz3Putxvbs', // Nilavu Thoongum Neram — Kunguma Chimil (Ilaiyaraaja)
+      'f7DFSJFHJ-A', // Antha Nilava Than — Muthal Mariyathai (Ilaiyaraaja)
+      'hXljWDVgO3Q', // Nila Adhu Vanathumele — Nayakan (Ilaiyaraaja)
+      'wj2V-EaQHEo', // Nila Kaigirathu — Indira (A.R. Rahman)
+      '3TVvRETczto', // Vennilave Vennilave — Minsara Kanavu (A.R. Rahman)
+      'Qr_Lr4Dt-oo', // Vaanile Thenila — Kakki Sattai (Ilaiyaraaja, SPB)
+      'UhOeCq602No', // Vaan Nila Nila Alla — Pattina Pravesam (MSV)
+      'oyi-_A-S7eo', // Chandrodayam Oru Pennanatho — MGR (MSV)
+    ],
+    playlist: '', // unused while `videos` is set
   },
   {
     key: 'kanavu',
