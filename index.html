@@ -902,8 +902,9 @@ const winBtn = document.getElementById('winToggle');
 function renderWindow(){
   winBtn.classList.toggle('open', windowOpen);
   document.body.classList.toggle('win-closed', !windowOpen);
-  document.getElementById('wOpen').classList.toggle('on', windowOpen);
-  document.getElementById('wClose').classList.toggle('on', !windowOpen);
+  // amber invites the next action: open window offers மூடு, closed offers திற
+  document.getElementById('wOpen').classList.toggle('on', !windowOpen);
+  document.getElementById('wClose').classList.toggle('on', windowOpen);
   winBtn.setAttribute('aria-pressed', String(windowOpen));
 }
 renderWindow();
