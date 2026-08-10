@@ -354,6 +354,11 @@
   .bf-latch::after{content:'';position:absolute;left:50%;bottom:7px;width:6px;height:6px;
     margin-left:-3px;border-radius:50%;background:#151924;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}
   .bf-latch:active{filter:brightness(1.25)}
+  /* left latch holds the route boards once you've boarded — its screw glows */
+  .bf-latch.holds-routes::after{background:var(--amber);box-shadow:0 0 8px 2px rgba(255,176,0,.7)}
+  .bf-latch.pulse{animation:latchpulse 1.1s ease 2}
+  @keyframes latchpulse{50%{box-shadow:0 0 16px 5px rgba(255,176,0,.55)}}
+  .bus-sign.on{pointer-events:auto;cursor:pointer}
 
   .winglass{position:fixed;inset:0;z-index:5;pointer-events:none;
     transform:translateX(103%);transition:transform .95s cubic-bezier(.45,0,.2,1);
@@ -413,7 +418,7 @@
 
   /* ---------- HERO ---------- */
   .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;
-    margin-top:max(140px,13vh);padding:0 24px;text-align:center}
+    margin-top:max(140px,13vh);padding:0 24px;text-align:center;pointer-events:none}
   .hero .tamil{font-family:'Baloo Thambi 2',sans-serif;font-weight:800;
     font-size:clamp(52px,11vw,110px);line-height:1.3;padding:.05em .1em;margin:-.05em 0;
     background:linear-gradient(180deg,#fff6df 20%,#ffc966 70%,#e89b1c);
@@ -443,7 +448,9 @@
 
   /* ---------- ROUTE BOARD TOGGLE ---------- */
   .routes{position:relative;z-index:10;margin-top:2.2vh;display:flex;justify-content:center;gap:14px;
-    padding:0 20px calc(170px + 6vh);flex-wrap:wrap} /* bottom clearance so the last board scrolls above the fixed player */
+    padding:0 20px calc(170px + 6vh);flex-wrap:wrap; /* bottom clearance so the last board scrolls above the fixed player */
+    transition:opacity .8s ease,transform .8s ease}
+  .routes.off{opacity:0;transform:translateY(16px);pointer-events:none}
   .route-btn{cursor:pointer;border:none;border-radius:10px;padding:10px 18px 8px;
     background:#0a0a0a;border:1px solid #2a2a2a;
     box-shadow:0 4px 20px rgba(0,0,0,.6),inset 0 0 18px rgba(0,0,0,.9);
@@ -913,8 +920,27 @@ function toggleWindow(){
   if (sfx.ready() && !PLAIN) sfx.windowSlide();
 }
 winBtn.addEventListener('click', toggleWindow);
-document.getElementById('latchL').addEventListener('click', toggleWindow);
 document.getElementById('latchR').addEventListener('click', toggleWindow);
+
+// left latch tucks the route boards away / brings them back (only once aboard);
+// tapping the front destination sign does the same
+let routesHidden = false;
+function setRoutesHidden(h){
+  if (h && !activeRoute) return; // never strand a rider with no boards and no bus
+  routesHidden = h;
+  routesEl.classList.toggle('off', h);
+  const latch = document.getElementById('latchL');
+  latch.classList.toggle('holds-routes', h);
+  if (h){
+    latch.classList.remove('pulse'); void latch.offsetWidth;
+    latch.classList.add('pulse');
+  }
+}
+document.getElementById('latchL').addEventListener('click', () => {
+  setRoutesHidden(!routesHidden);
+  if (sfx.ready() && !PLAIN) sfx.kachunk();
+});
+$('busSign').addEventListener('click', () => setRoutesHidden(!routesHidden));
 
 // YouTube IFrame API
 let player = null, ready = false, pendingRoute = null;
@@ -1002,6 +1028,8 @@ function boardRoute(r, btn){
   } else {
     insert();
   }
+  // once you're aboard, the boards tuck away behind the left latch
+  setTimeout(() => setRoutesHidden(true), 2200);
 }
 
 function markActive(r, btn){
